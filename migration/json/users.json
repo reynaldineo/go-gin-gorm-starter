@@ -1,0 +1,23 @@
+[
+  {
+    "name": "admin",
+    "telp_number": "08123456789",
+    "email": "admin@gmail.com",
+    "password": "password123!",
+    "role": "admin"
+  },
+  {
+    "name": "user",
+    "telp_number": "08123456789",
+    "email": "user@gmail.com",
+    "password": "password123!",
+    "role": "user"
+  },
+  {
+    "name": "reynaldineo",
+    "telp_number": "082211221122",
+    "email": "reynaldineo@gmail.com",
+    "password": "password123!",
+    "role": "user"
+  }
+]

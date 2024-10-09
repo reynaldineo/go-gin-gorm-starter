@@ -2,42 +2,52 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/reynaldineo/go-gin-gorm-starter/constant"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
-func ConnectDB() {
-	// Load environment variables from the .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file %V", err)
+func SetUpDatabaseConnection() *gorm.DB {
+	if os.Getenv("APP_ENV") == constant.ENUM_RUN_PRODUCTION {
+		err := godotenv.Load(".env.production")
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		err := godotenv.Load(".env")
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASS")
 	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
-	dbSSLMode := os.Getenv("DB_SSLMODE")
+	dbPort := os.Getenv("DB_PORT")
 
-	// Construct the DSN (Data Source Name) using the environment variables
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=Asia/Jakarta",
-		dbHost, dbUser, dbPass, dbName, dbPort, dbSSLMode)
+	dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v TimeZone=Asia/Jakarta", dbHost, dbUser, dbPass, dbName, dbPort)
 
-	// Open a connection to the database
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		panic(err)
 	}
 
-	log.Println("Database connection established.")
+	return db
+}
+
+func CloseDatabaseConnection(db *gorm.DB) {
+	dbSQL, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+	dbSQL.Close()
 }
 
 // https://gorm.io/docs/connecting_to_the_database.html#PostgreSQL
